@@ -4,14 +4,17 @@ using UnityEngine;
 using Zenject;
 using GenLibrary;
 using System;
-using NaughtyAttributes;
+using System.Linq;
 
 public class RepositoryInstaller : MonoInstaller
 {
+    [SerializeField]
+    private ConcreteRepositroyItemsTest testConcreteRepository;
+
     public override void InstallBindings()
     {
-        base.InstallBindings();
-
+        //base.InstallBindings();
+        Container.Bind<IRepositoryAll<ItemTest>>().FromInstance(testConcreteRepository); //IRepositoryAll<ItemTest>
     }
 }
 
@@ -22,32 +25,7 @@ public class ItemTest
     public int naming;
 }
 
-public class ItemsController : MonoBehaviour
-{
-    [SerializeField]
-    private IRepositoryAll<ItemTest> irepository;
-
-    [SerializeField]
-    private ItemTest currentItemTest;
-
-    //[Button]
-    public void CallCopyAndAdd()
-    {
-        ItemTest bufferNew = new ItemTest();
-        bufferNew.id = currentItemTest.id;
-        bufferNew.naming = currentItemTest.naming;
-
-        irepository.AddItem(bufferNew);
-    }
-
-    private void Construct(IRepositoryAll<ItemTest> _irepository)
-    {
-        irepository = _irepository;
-    }
-
-}
-
-public abstract class RepositoryImplementing<T> : IRepositoryAll<T>
+public abstract class RepositoryImplementing<T> : MonoBehaviour, IRepositoryAll<T>
 {
     public List<T> collectionHolders;
 
@@ -59,7 +37,7 @@ public abstract class RepositoryImplementing<T> : IRepositoryAll<T>
 
     public T GetItemByExpression(Func<T, bool> _expressionPredicate)
     {
-        throw new NotImplementedException();
+        return collectionHolders.Where(_expressionPredicate).FirstOrDefault();
     }
 
     public List<T> GetItemsByExpression(Func<T, bool> _expressionPredicate)
